@@ -41,13 +41,14 @@ class DBHelper {
     fetch(DBHelper.DATABASE_URL)
       .then( response => response.json() )
       .then( restaurants => {
-          // Place data into Index DB before dispatching the callback
-          const tx = db.transaction(indexDB.stores.restaurants, 'readwrite');
-          const store = tx.objectStore(indexDB.stores.restaurants);
-          restaurants.forEach( restaurant => {
-            store.put(restaurant);
-          });
-
+          if( db ){
+            // Place data into Index DB before dispatching the callback if it exists
+            const tx = db.transaction(indexDB.stores.restaurants, 'readwrite');
+            const store = tx.objectStore(indexDB.stores.restaurants);
+            restaurants.forEach( restaurant => {
+              store.put(restaurant);
+            });
+          }
           callback(null, restaurants);
       })
       .catch( error => {
@@ -61,27 +62,30 @@ class DBHelper {
     const dbPromise = openIndexDatabase();
 
     dbPromise.then( db => {
-      db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants).getAll().then( storeVals => {
-        if ( storeVals.length == 0 ){
-          // If it's first load, there's no point fetchin from IDB, go to online DB
-          DBHelper.fetchRestaurantsOnline(db, callback); //gets data and stores to IDB
-        }
-        else {
-          //Fetch from IDB then call out to server to update IDB
-          DBHelper.fetchRestaurantsOnline(db, () => { return; }); //keeps IDB in sync with any updates to the server data asynchronously
-          
-          const restaurants = db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants);
-          return restaurants.getAll().then( restaurantList => {
-            callback(null, restaurantList);
-          }).catch( error => {
-            const err = (`Request failed. Error returned: ${error}`);
-            callback(err, null);
-          });
-        }
-      });
+      if(!db){ DBHelper.fetchRestaurantsOnline(false, callback); }
+      else{ 
+        db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants).getAll().then( storeVals => {
+          if ( storeVals.length == 0 ){
+            // If it's first load, there's no point fetchin from IDB, go to online DB
+            DBHelper.fetchRestaurantsOnline(db, callback); //gets data and stores to IDB
+          }
+          else {
+            //Fetch from IDB then call out to server to update IDB
+            DBHelper.fetchRestaurantsOnline(db, () => { return; }); //keeps IDB in sync with any updates to the server data asynchronously
+            
+            const restaurants = db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants);
+            return restaurants.getAll().then( restaurantList => {
+              callback(null, restaurantList);
+            }).catch( error => {
+              const err = (`Request failed. Error returned: ${error}`);
+              callback(err, null);
+            });
+          }
+        });
+      }
     }).catch(err => {
       console.warn("There was an error opening IndexDB. Falling back to online DB.");
-      DBHelper.fetchRestaurantsOnline(callback);
+      DBHelper.fetchRestaurantsOnline(false, callback);
     });
   }
 
