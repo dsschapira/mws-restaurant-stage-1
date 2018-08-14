@@ -16,7 +16,6 @@ class DBHelper {
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    //Get restaurants from internet DB
     fetch(DBHelper.DATABASE_URL)
       .then( response => response.json() )
       .then( restaurants => {
