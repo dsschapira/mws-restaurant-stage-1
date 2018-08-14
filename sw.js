@@ -37,7 +37,7 @@ self.addEventListener('fetch', event => {
             }
             else if(key == 'mode'){
                 // A request cannot be created with a mode of "Navigate"
-                init[key] = '';
+                init[key] = 'cors';
             }
             else{
                 init[key] = cacheRequest[key];
