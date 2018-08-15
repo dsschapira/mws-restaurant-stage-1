@@ -2,23 +2,29 @@
 ---
 #### _Three Stage Course Material Project - Restaurant Reviews_
 
-## Project Overview: Stage 1
+## Project Overview: Stage 1 & 2
 
 For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
 
-### Specification
+In **Stage Two**, restaurant data is now pulled from a server instead of a local .json file and saving data with IDB was added.  Accessibility was further improved upon as well.  Finally, a manifest.json file was added and the app is now able to be downloaded as a PWA when served over an https connection.
 
-You have been provided the code for a restaurant reviews website. The code has a lot of issues. It’s barely usable on a desktop browser, much less a mobile device. It also doesn’t include any standard accessibility features, and it doesn’t work offline at all. Your job is to update the code to resolve these issues while still maintaining the included functionality. 
+### Description & Specifications
 
-### What do I do from here?
+This webapp shows a listing of restaurants with their geographic locations shown on a map.  The restaurants have related information and reviews.  All data is pulled asynchronously from a server.
 
-1. In this folder, start up a simple HTTP server to serve up the site files on your local computer. Python has some simple tools to do this, and you don't even need to know Python. For most people, it's already installed on your computer. 
+After visitng, the webapp will be available offline and remain performant with a poor connection.  Additionally, the app is built with accesibility in mind and is fully responsive.
+
+### How do I run this app?
+
+1. A companion repository is needed to run this successfully.  First, clone the repo here [dsschapira - stage 2 companion repo](https://github.com/dsschapira/mws-restaurant-stage-2) and start it using the command `node server` from the project directory.
+
+2. In this folder, start up a simple HTTP server to serve up the site files on your local computer. Python has some simple tools to do this, and you don't even need to know Python. For most people, it's already installed on your computer. 
 
 In a terminal, check the version of Python you have: `python -V`. If you have Python 2.x, spin up the server with `python -m SimpleHTTPServer 8000` (or some other port, if port 8000 is already in use.) For Python 3.x, you can use `python3 -m http.server 8000`. If you don't have Python installed, navigate to Python's [website](https://www.python.org/) to download and install the software.
 
-2. With your server running, visit the site: `http://localhost:8000`, and look around for a bit to see what the current experience looks like.
-3. Explore the provided code, and start making a plan to implement the required features in three areas: responsive design, accessibility and offline use.
-4. Write code to implement the updates to get this site on its way to being a mobile-ready website.
+**NOTE**: I have Python 3.6.5 on my computer, and the command `python -m http.server 8000` works for me.  The `3` in the `python3 -m http.server 8000` may be unnecessary.
+
+3. With your server running, visit the site: `http://localhost:8000`.
 
 ## Leaflet.js and Mapbox:
 
