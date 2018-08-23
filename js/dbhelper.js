@@ -19,7 +19,7 @@ function openIndexDatabase(){
   }
 
   return idb.open(indexDB.name, indexDB.version, upgradeDB => {
-    upgradeDB.createObjectStore(indexDB.stores.restaurants, { keyPath: 'name'});
+    upgradeDB.createObjectStore(indexDB.stores.restaurants, { keyPath: 'id'});
   });
 }
 
@@ -27,7 +27,6 @@ class DBHelper {
 
   /**
    * Database URL.
-   * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
@@ -71,11 +70,10 @@ class DBHelper {
           }
           else {
             //Fetch from IDB then call out to server to update IDB
-            DBHelper.fetchRestaurantsOnline(db, () => { return; }); //keeps IDB in sync with any updates to the server data asynchronously
-            
             const restaurants = db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants);
             return restaurants.getAll().then( restaurantList => {
               callback(null, restaurantList);
+              DBHelper.updateServerState(restaurantList); //send off updates to the server that were saved in IDB
             }).catch( error => {
               const err = (`Request failed. Error returned: ${error}`);
               callback(err, null);
@@ -225,16 +223,54 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
   } 
-  /* static mapMarkerForRestaurant(restaurant, map) {
-    const marker = new google.maps.Marker({
-      position: restaurant.latlng,
-      title: restaurant.name,
-      url: DBHelper.urlForRestaurant(restaurant),
-      map: map,
-      animation: google.maps.Animation.DROP}
-    );
-    return marker;
-  } */
+  
+  /**
+   * Functions for updating
+   */
+  static updateFavoriteRestaurants(restaurantID, status, cb){
+    const url = `${DBHelper.DATABASE_URL}/${restaurantID}/?is_favorite=${status}`;
+
+    // Update IDB before dispatching fetch. const dbPromise = openIndexDatabase();
+    const dbPromise = openIndexDatabase();
+
+    dbPromise.then( db => {
+      const tx = db.transaction(indexDB.stores.restaurants, 'readwrite');
+      const store = tx.objectStore(indexDB.stores.restaurants);
+
+      store.get(parseInt(restaurantID)).then(restaurant => { 
+        restaurant.is_favorite = status;
+        store.put(restaurant)
+        .then(()=>{
+          console.log('got here...');
+          cb(200);
+        })
+        .catch(err =>{
+          cb(err);
+        });
+      });
+
+    }).catch(err => {
+      console.warn("There was an error opening IndexDB.");
+      console.warn(err);
+    });
+
+    fetch(url, { method: 'PUT'})
+      .then(response => {
+        console.log(response);
+      })
+      .catch(err => {
+        console.warn('There was an error updating the DB.. will attempt again on reconnect. ', err);
+      });
+  }
+
+  static updateServerState(restaurants){
+    //Update all favorites
+    restaurants.forEach(restaurant => {
+      const url = `${DBHelper.DATABASE_URL}/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`
+      fetch(url, { method: 'PUT'})
+    });
+    //Also upload reviews
+  }
 
 }
 

@@ -137,6 +137,7 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant=> {
     ul.append(createRestaurantHTML(restaurant));
   });
+  attachIconEventListeners();
   addMarkersToMap();
 }
 
@@ -145,6 +146,13 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
+  li.setAttribute('data-id',restaurant.id);
+
+  if(restaurant.is_favorite != 'false' && (restaurant.is_favorite || restaurant.is_favorite == 'true')){
+    //unfortunately, need to do a string check for true/false because of initial DB state
+    console.log(restaurant);
+    li.classList.add('favorite');
+  }
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
@@ -180,8 +188,9 @@ createRestaurantHTML = (restaurant) => {
   favorite.setAttribute('role','button');
   
   const favoritePath = document.createElementNS("http://www.w3.org/2000/svg",'path');
-  favoritePath.setAttribute('d','M 50 75 C 45,75 0, 0 50, 35 M 50 75 C  55, 75 100, 0 50, 35');
+  favoritePath.setAttribute('d','M 50 85 C 35,75 0, 0 50, 35 M 50 85 C  65, 75 100, 0 50, 35');
   favoritePath.setAttribute('stroke','#D68711');
+  favoritePath.setAttribute('stroke-width', '2');
   favorite.append(favoritePath);
   li.append(favorite);
 
@@ -203,3 +212,25 @@ addMarkersToMap = (restaurants = self.restaurants) => {
   });
 
 } 
+
+attachIconEventListeners = () => {
+  const favoriteIconPaths = Array.prototype.slice.call(document.querySelectorAll('#restaurants-list li path'));
+  
+  favoriteIconPaths.forEach(icon => {
+    icon.addEventListener('click', e => {
+      const restaurantElement = e.target.parentNode.parentNode;
+      const restaurantID = restaurantElement.getAttribute('data-id');
+      const favStatus = restaurantElement.classList.toggle('favorite');
+
+      DBHelper.updateFavoriteRestaurants(restaurantID, favStatus, (status) => {
+        console.log(favStatus);
+        if(status !== 200){
+          restaurantElement.classList.toggle('favorite'); //swap back to what it was if there was an error changing it
+          console.warn('There was an error updating favorite restaurants. ',status);
+        }
+      });
+
+      
+    });
+  });
+}
