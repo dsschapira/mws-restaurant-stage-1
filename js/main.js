@@ -150,7 +150,6 @@ createRestaurantHTML = (restaurant) => {
 
   if(restaurant.is_favorite != 'false' && (restaurant.is_favorite || restaurant.is_favorite == 'true')){
     //unfortunately, need to do a string check for true/false because of initial DB state
-    console.log(restaurant);
     li.classList.add('favorite');
   }
 
