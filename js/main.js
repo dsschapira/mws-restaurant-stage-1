@@ -222,7 +222,6 @@ attachIconEventListeners = () => {
       const favStatus = restaurantElement.classList.toggle('favorite');
 
       DBHelper.updateFavoriteRestaurants(restaurantID, favStatus, (status) => {
-        console.log(favStatus);
         if(status !== 200){
           restaurantElement.classList.toggle('favorite'); //swap back to what it was if there was an error changing it
           console.warn('There was an error updating favorite restaurants. ',status);

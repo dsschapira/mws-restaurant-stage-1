@@ -241,7 +241,6 @@ class DBHelper {
         restaurant.is_favorite = status;
         store.put(restaurant)
         .then(()=>{
-          console.log('got here...');
           cb(200);
         })
         .catch(err =>{
@@ -255,9 +254,6 @@ class DBHelper {
     });
 
     fetch(url, { method: 'PUT'})
-      .then(response => {
-        console.log(response);
-      })
       .catch(err => {
         console.warn('There was an error updating the DB.. will attempt again on reconnect. ', err);
       });
