@@ -9,7 +9,6 @@ self.addEventListener('install', event => {
                 '/restaurant.html',
                 '/manifest.json',
                 '/css/styles.css',
-                '/data/restaurants.json',
                 '/js/dbhelper.js',
                 '/js/main.js',
                 '/js/restaurant_info.js',
@@ -61,7 +60,9 @@ function serveRequest(request){
             response ||
             fetch(request).then(fetchResponse => {
                 return caches.open(cacheName).then(cache => {
-                    cache.put(request, fetchResponse.clone());
+                    if(request.method == "GET"){
+                        cache.put(request, fetchResponse.clone());
+                    }
                     return fetchResponse;
                 });
             })

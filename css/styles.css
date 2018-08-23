@@ -216,7 +216,7 @@ nav h1 a {
   fill: #D68711;
   cursor: pointer;
 }
-#restaurants-list li svg.favorite path{
+#restaurants-list li.favorite path{
   fill: #D68711;
 }
 /* ====================== Restaurant Details ====================== */
