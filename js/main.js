@@ -134,7 +134,7 @@ resetRestaurants = (restaurants) => {
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
   const ul = document.getElementById('restaurants-list');
-  restaurants.forEach(restaurant => {
+  restaurants.forEach(restaurant=> {
     ul.append(createRestaurantHTML(restaurant));
   });
   addMarkersToMap();
@@ -168,7 +168,22 @@ createRestaurantHTML = (restaurant) => {
   more.innerHTML = 'View Details';
   more.setAttribute('role','button');
   more.href = DBHelper.urlForRestaurant(restaurant);
-  li.append(more)
+  li.append(more);
+
+  const favorite = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  favorite.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  favorite.setAttribute('xmlns:xlink','http://www.w3.org/1999/xlink');
+  favorite.setAttribute('aria-label','Mark restaurant as favorite');
+  favorite.setAttribute('viewBox','0 0 100 100');
+  favorite.setAttribute('width','100');
+  favorite.setAttribute('height','100');
+  favorite.setAttribute('role','button');
+  
+  const favoritePath = document.createElementNS("http://www.w3.org/2000/svg",'path');
+  favoritePath.setAttribute('d','M 50 75 C 45,75 0, 0 50, 35 M 50 75 C  55, 75 100, 0 50, 35');
+  favoritePath.setAttribute('stroke','#D68711');
+  favorite.append(favoritePath);
+  li.append(favorite);
 
   return li
 }
