@@ -1,4 +1,4 @@
-const cacheName = "dss-restaurant-reviewer-v1";
+const cacheName = "dss-restaurant-reviewer-v2";
 
 self.addEventListener('install', event => {
     event.waitUntil(
@@ -17,7 +17,7 @@ self.addEventListener('install', event => {
         })
         .catch(error => {
             return;
-            //console.log("There was an error: ",error);
+            console.log("There was an error installing the service worker: ",error);
         })
     );
 });
@@ -26,6 +26,13 @@ self.addEventListener('fetch', event => {
     let cacheRequest = event.request;
     let requestUrl = new URL(event.request.url);
 
+    if(requestUrl.hostname !== "localhost"){
+        event.request.mode = "cors";
+    }
+    if(requestUrl.href.indexOf('leaflet.css') > -1){
+        //add the integrity key if getting leaflet css
+        event.request.integrity = "sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+    }
     if(event.request.url.indexOf('restaurant.html') > -1){
         // Get rid of the ID url variable while ensuring we 
         // maintain all other request parameters
@@ -44,9 +51,6 @@ self.addEventListener('fetch', event => {
             }
         }
         cacheRequest = new Request('restaurant.html', init);
-    }
-    if(requestUrl.hostname !== "localhost"){
-        event.request.mode = "no-cors";
     }
     if(event.request.url.indexOf('chrome-extension') > -1){
         return;
@@ -68,7 +72,7 @@ function serveRequest(request){
             })
             .catch(error => {
                 return;
-                //console.log("There was an error: ",error);
+                console.log("There was an error: ",error);
             })
         );
     });
