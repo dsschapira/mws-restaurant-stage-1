@@ -7,7 +7,8 @@ const indexDB = {
   name: 'dss-restaurants-app',
   version: 1,
   stores: {
-    restaurants: 'restaurants'
+    restaurants: 'restaurants',
+    reviews: 'reviews'
   }
 };
 
@@ -20,6 +21,7 @@ function openIndexDatabase(){
 
   return idb.open(indexDB.name, indexDB.version, upgradeDB => {
     upgradeDB.createObjectStore(indexDB.stores.restaurants, { keyPath: 'id'});
+    upgradeDB.createObjectStore(indexDB.stores.reviews, {keyPath: 'id'});
   });
 }
 
@@ -28,49 +30,72 @@ class DBHelper {
   /**
    * Database URL.
    */
-  static get DATABASE_URL() {
-    const port = 1337 // Change this to your server port
+  static get RESTAURANT_DB_URL() {
+    const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
 
+  static get REVIEW_DB_URL() {
+    const port = 1337;
+    return `http://localhost:${port}/reviews`;
+  }
   /**
    * Fetch all restaurants.
    */
-  static fetchRestaurantsOnline(db, callback){
-    fetch(DBHelper.DATABASE_URL)
+  static fetchRestaurants(callback) {
+    DBHelper.fetchFromDB('restaurants', callback);
+  }
+
+  static fetchReviews(callback){
+    DBHelper.fetchFromDB('reviews', callback);
+  }
+
+  static fetchFromOnline(type, db, callback) {
+    const storeReference = (type == "restaurants" ? indexDB.stores.restaurants : (type == "reviews" ? indexDB.stores.reviews : false));
+    const DB_Url = (type == "restaurants" ? DBHelper.RESTAURANT_DB_URL : (type == "reviews" ? DBHelper.REVIEW_DB_URL : false));
+
+    if(!storeReference || !DB_Url){
+      console.error("Invalid store type value: ", type);
+    }
+
+    fetch(DB_Url)
       .then( response => response.json() )
-      .then( restaurants => {
+      .then( response_group => {
           if( db ){
             // Place data into Index DB before dispatching the callback if it exists
-            const tx = db.transaction(indexDB.stores.restaurants, 'readwrite');
-            const store = tx.objectStore(indexDB.stores.restaurants);
-            restaurants.forEach( restaurant => {
-              store.put(restaurant);
+            const tx = db.transaction(storeReference, 'readwrite');
+            const store = tx.objectStore(storeReference);
+            response_group.forEach( response_item => {
+              store.put(response_item);
             });
           }
-          callback(null, restaurants);
+          callback(null, response_group);
       })
       .catch( error => {
           const err = (`Request failed. Error returned: ${error}`);
           callback(err, null);
       });
+
   }
 
-  static fetchRestaurants(callback) {
-
+  static fetchFromDB(type, callback) {
     const dbPromise = openIndexDatabase();
+    const storeReference = (type == "restaurants" ? indexDB.stores.restaurants : (type == "reviews" ? indexDB.stores.reviews : false));
+    if(!storeReference){
+      console.error("Invalid store type value: ", type);
+    }
 
     dbPromise.then( db => {
-      if(!db){ DBHelper.fetchRestaurantsOnline(false, callback); }
+      if(!db){ fetchFromOnline(type, false, callback); }
       else{ 
-        db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants).getAll().then( storeVals => {
+        db.transaction(storeReference).objectStore(storeReference).getAll().then( storeVals => {
           if ( storeVals.length == 0 ){
             // If it's first load, there's no point fetchin from IDB, go to online DB
-            DBHelper.fetchRestaurantsOnline(db, callback); //gets data and stores to IDB
+            fetchFromOnline(type, db, callback); //gets data and stores to IDB
           }
           else {
             //Fetch from IDB then call out to server to update IDB
-            const restaurants = db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants);
+            const restaurants = db.transaction(storeReference).objectStore(storeReference);
             return restaurants.getAll().then( restaurantList => {
               callback(null, restaurantList);
             }).catch( error => {
@@ -80,10 +105,12 @@ class DBHelper {
           }
         });
       }
-    }).catch(err => {
+    })
+    .catch(err => {
       console.warn("There was an error opening IndexDB. Falling back to online DB.");
-      DBHelper.fetchRestaurantsOnline(false, callback);
+      fetchFromOnline(type, false, callback);
     });
+    
   }
 
   /**
@@ -222,12 +249,12 @@ class DBHelper {
       marker.addTo(newMap);
     return marker;
   } 
-  
+
   /**
    * Functions for updating
    */
   static updateFavoriteRestaurants(restaurantID, status, cb){
-    const url = `${DBHelper.DATABASE_URL}/${restaurantID}/?is_favorite=${status}`;
+    const url = `${DBHelper.RESTAURANT_DB_URL}/${restaurantID}/?is_favorite=${status}`;
 
     // Update IDB before dispatching fetch. const dbPromise = openIndexDatabase();
     const dbPromise = openIndexDatabase();
@@ -262,7 +289,7 @@ class DBHelper {
     //Update all favorites
     DBHelper.fetchRestaurants((err, restaurants) => {
       restaurants.forEach(restaurant => {
-        const url = `${DBHelper.DATABASE_URL}/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`
+        const url = `${DBHelper.RESTAURANT_DB_URL}/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`
         fetch(url, { method: 'PUT'})
       });
     });
