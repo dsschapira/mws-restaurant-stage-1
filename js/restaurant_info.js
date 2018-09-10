@@ -8,6 +8,20 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
 });
 
+const page_url = new URLSearchParams(window.location.search);
+const RESTAURANT_ID = page_url.get('id');
+
+document.querySelector('#review-form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = {
+    "name": e.target.elements["name"].value,
+    "comments": e.target.elements["comments"].value,
+    "rating": e.target.elements["rating"].value,
+    "restaurant_id": RESTAURANT_ID
+  };
+  console.log(input);
+});
+
 /**
  * Initialize leaflet map
  */
