@@ -280,16 +280,17 @@ nav h1 a {
   text-transform: uppercase;
 	width: 100%;
 }
-#restaurant-container, #reviews-container {
+#restaurant-container, #reviews-container, #add-review-container {
   border-bottom: 1px solid #d9d9d9;
   border-top: 1px solid #fff;
   padding: 90px 40px 30px;
   width: calc(100% - 80px);
 }
-#reviews-container {
+#reviews-container, #add-review-container {
   padding: 30px 40px 80px;
 }
-#reviews-container h3 {
+#reviews-container h3,
+#add-review-container h3 {
   color: #f58500;
   font-size: 24pt;
   font-weight: 300;
@@ -317,6 +318,31 @@ nav h1 a {
 #restaurant-hours td {
   color: #000;
   font-size: 1em;
+}
+#add-review-container form{
+  max-width: 85%;
+  padding-bottom: 50px;
+}
+#add-review-container input,
+#add-review-container textarea{
+  width: 100%;
+  padding: 1em;
+  margin: 0.5em 0em;
+}
+#add-review-container textarea{
+  resize: vertical;
+  min-height: 100px;
+}
+#add-review-container form button{
+  background-color: #db8700;
+  color: #030303;
+  display: inline-block;
+  font-size: 10pt;
+  padding: 8px 30px 10px;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  border: none;
 }
 /*Minor Mobile Fix*/
 @media only screen and (min-width:444px){
@@ -352,6 +378,13 @@ nav h1 a {
   #restaurant-hours td{
     font-size: 12px;
   }
+  #add-review-container form{
+    max-width: 50%;
+  }
+  #add-review-container input,
+  #add-review-container textarea{
+    width: 80%;
+  }
 }
 /*Desktops*/
 @media only screen and (min-width: 1251px){
@@ -380,6 +413,10 @@ nav h1 a {
   }
   #reviews-list li p{
     font-size:1.5em;
+  }
+  #add-review-container input,
+  #add-review-container textarea{
+    width: 90%;
   }
 }
 /*Max Size*/
