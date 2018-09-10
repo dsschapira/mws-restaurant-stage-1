@@ -344,6 +344,10 @@ nav h1 a {
   text-transform: uppercase;
   border: none;
 }
+#add-review-container label{
+  font-size: 16pt;
+  color: #f58500;
+}
 /*Minor Mobile Fix*/
 @media only screen and (min-width:444px){
   /* ====================== Restaurant Filtering ====================== */
