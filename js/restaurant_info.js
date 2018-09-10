@@ -8,17 +8,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap();
 });
 
-document.querySelector('#review-form').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const input = {
-    "name": e.target.elements["name"].value,
-    "comments": e.target.elements["comments"].value,
-    "rating": e.target.elements["rating"].value,
-    "restaurant_id": self.restaurant.id
-  };
-  console.log(input);
-});
-
 /**
  * Initialize leaflet map
  */
@@ -94,7 +83,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  fillReviewsHTML(null, addSubmitListener);
 }
 
 /**
@@ -120,7 +109,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews = self.restaurant.reviews, callback) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
@@ -133,10 +122,12 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
+  console.log(reviews);
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
+  callback();
 }
 
 /**
@@ -187,4 +178,17 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+addSubmitListener = () => {
+  document.querySelector('#review-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const input = {
+      "name": e.target.elements["name"].value,
+      "comments": e.target.elements["comments"].value,
+      "rating": e.target.elements["rating"].value,
+      "restaurant_id": self.restaurant.id
+    };
+    console.log(input);
+    });
 }

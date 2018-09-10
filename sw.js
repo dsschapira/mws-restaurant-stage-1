@@ -1,6 +1,6 @@
 importScripts('/js/dbhelper.js');
 
-const cacheName = "dss-restaurant-reviewer-v2";
+const cacheName = "dss-restaurant-reviewer-v3";
 
 self.addEventListener('install', event => {
     event.waitUntil(
@@ -46,7 +46,7 @@ self.addEventListener('fetch', event => {
             }
             else if(key == 'mode'){
                 // A request cannot be created with a mode of "Navigate"
-                init[key] = 'cors';
+                init[key] = 'same-origin';
             }
             else{
                 init[key] = cacheRequest[key];

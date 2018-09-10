@@ -86,12 +86,12 @@ class DBHelper {
     }
 
     dbPromise.then( db => {
-      if(!db){ fetchFromOnline(type, false, callback); }
+      if(!db){ DBHelper.fetchFromOnline(type, false, callback); }
       else{ 
         db.transaction(storeReference).objectStore(storeReference).getAll().then( storeVals => {
           if ( storeVals.length == 0 ){
             // If it's first load, there's no point fetchin from IDB, go to online DB
-            fetchFromOnline(type, db, callback); //gets data and stores to IDB
+            DBHelper.fetchFromOnline(type, db, callback); //gets data and stores to IDB
           }
           else {
             //Fetch from IDB then call out to server to update IDB
@@ -108,7 +108,7 @@ class DBHelper {
     })
     .catch(err => {
       console.warn("There was an error opening IndexDB. Falling back to online DB.");
-      fetchFromOnline(type, false, callback);
+      DBHelper.fetchFromOnline(type, false, callback);
     });
     
   }
