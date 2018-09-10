@@ -1,3 +1,5 @@
+importScripts('/js/dbhelper.js');
+
 const cacheName = "dss-restaurant-reviewer-v2";
 
 self.addEventListener('install', event => {
@@ -56,6 +58,14 @@ self.addEventListener('fetch', event => {
         return;
     }
     event.respondWith(serveRequest(cacheRequest));
+});
+
+self.addEventListener('sync', event => {
+    if(event.tag == 'syncUpdates'){
+        event.waitUntil(
+            DBHelper.updateServerState()
+        );
+    }
 });
 
 function serveRequest(request){

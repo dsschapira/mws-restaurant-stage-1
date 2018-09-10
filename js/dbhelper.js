@@ -73,7 +73,6 @@ class DBHelper {
             const restaurants = db.transaction(indexDB.stores.restaurants).objectStore(indexDB.stores.restaurants);
             return restaurants.getAll().then( restaurantList => {
               callback(null, restaurantList);
-              DBHelper.updateServerState(restaurantList); //send off updates to the server that were saved in IDB
             }).catch( error => {
               const err = (`Request failed. Error returned: ${error}`);
               callback(err, null);
@@ -259,11 +258,13 @@ class DBHelper {
       });
   }
 
-  static updateServerState(restaurants){
+  static updateServerState(){
     //Update all favorites
-    restaurants.forEach(restaurant => {
-      const url = `${DBHelper.DATABASE_URL}/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`
-      fetch(url, { method: 'PUT'})
+    DBHelper.fetchRestaurants((err, restaurants) => {
+      restaurants.forEach(restaurant => {
+        const url = `${DBHelper.DATABASE_URL}/${restaurant.id}/?is_favorite=${restaurant.is_favorite}`
+        fetch(url, { method: 'PUT'})
+      });
     });
     //Also upload reviews
   }
