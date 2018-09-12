@@ -281,7 +281,7 @@ class DBHelper {
 
     fetch(url, { method: 'PUT'})
       .catch(err => {
-        console.warn('There was an error updating the DB.. will attempt again on reconnect. ', err);
+        console.warn('There was an error updating the DB... will attempt again on reconnect. ', err);
       });
   }
 
