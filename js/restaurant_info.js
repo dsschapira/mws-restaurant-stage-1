@@ -210,7 +210,6 @@ addSubmitListener = () => {
       "createdAt": now,
       "updatedAt": now
     };
-    console.log(input.comments);
     DBHelper.postNewReview(input, (status)=>{
       if(status == 200){
         form.reset();
