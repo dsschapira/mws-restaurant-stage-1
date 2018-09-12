@@ -37,7 +37,7 @@ class DBHelper {
 
   static get REVIEW_DB_URL() {
     const port = 1337;
-    return `http://localhost:${port}/reviews`;
+    return `http://localhost:${port}/reviews/?restaurant_id=`;
   }
   /**
    * Fetch all restaurants.
@@ -46,13 +46,13 @@ class DBHelper {
     DBHelper.fetchFromDB('restaurants', callback);
   }
 
-  static fetchReviews(callback){
-    DBHelper.fetchFromDB('reviews', callback);
+  static fetchReviews(id, callback){
+    DBHelper.fetchFromDB('reviews', callback, id);
   }
 
-  static fetchFromOnline(type, db, callback) {
+  static fetchFromOnline(type, db, callback, restaurantID) {
     const storeReference = (type == "restaurants" ? indexDB.stores.restaurants : (type == "reviews" ? indexDB.stores.reviews : false));
-    const DB_Url = (type == "restaurants" ? DBHelper.RESTAURANT_DB_URL : (type == "reviews" ? DBHelper.REVIEW_DB_URL : false));
+    const DB_Url = (type == "restaurants" ? DBHelper.RESTAURANT_DB_URL : (type == "reviews" ? DBHelper.REVIEW_DB_URL+restaurantID : false));
 
     if(!storeReference || !DB_Url){
       console.error("Invalid store type value: ", type);
@@ -69,16 +69,20 @@ class DBHelper {
               store.put(response_item);
             });
           }
-          callback(null, response_group);
+          if(callback){
+            callback(null, response_group);
+          }
       })
       .catch( error => {
           const err = (`Request failed. Error returned: ${error}`);
-          callback(err, null);
+          if(callback){
+            callback(err, null);
+          }
       });
 
   }
 
-  static fetchFromDB(type, callback) {
+  static fetchFromDB(type, callback, restaurantID = null) {
     const dbPromise = openIndexDatabase();
     const storeReference = (type == "restaurants" ? indexDB.stores.restaurants : (type == "reviews" ? indexDB.stores.reviews : false));
     if(!storeReference){
@@ -86,18 +90,19 @@ class DBHelper {
     }
 
     dbPromise.then( db => {
-      if(!db){ DBHelper.fetchFromOnline(type, false, callback); }
+      if(!db){ DBHelper.fetchFromOnline(type, false, callback, restaurantID); }
       else{ 
         db.transaction(storeReference).objectStore(storeReference).getAll().then( storeVals => {
           if ( storeVals.length == 0 ){
             // If it's first load, there's no point fetchin from IDB, go to online DB
-            DBHelper.fetchFromOnline(type, db, callback); //gets data and stores to IDB
+            DBHelper.fetchFromOnline(type, db, callback, restaurantID); //gets data and stores to IDB
           }
           else {
             //Fetch from IDB then call out to server to update IDB
             const restaurants = db.transaction(storeReference).objectStore(storeReference);
             return restaurants.getAll().then( restaurantList => {
               callback(null, restaurantList);
+              DBHelper.fetchFromOnline(type, db, false, restaurantID);
             }).catch( error => {
               const err = (`Request failed. Error returned: ${error}`);
               callback(err, null);
@@ -108,7 +113,7 @@ class DBHelper {
     })
     .catch(err => {
       console.warn("There was an error opening IndexDB. Falling back to online DB.");
-      DBHelper.fetchFromOnline(type, false, callback);
+      DBHelper.fetchFromOnline(type, false, callback, restaurantID);
     });
     
   }
@@ -133,12 +138,15 @@ class DBHelper {
   }
 
   static fetchReviewsById(id, callback) {
-    DBHelper.fetchReviews((error, reviews) => {
+    DBHelper.fetchReviews(id, (error, reviews) => {
       if(error){
         callback(error, null);
       }
       else {
         const review_set = reviews.filter( review => review.restaurant_id === id );
+        if(review_set.length < 1){
+          DBHelper.fetchFromOnline("reviews", false, callback, id);
+        }
         callback(null, review_set);
       }
     });
@@ -327,7 +335,6 @@ class DBHelper {
       .catch(err => {
         console.warn('There was an error updating the DB... will attempt again on reconnect. ', err);
       });
-
   }
 
   static updateServerState(){
