@@ -251,6 +251,11 @@ class DBHelper {
   /**
    * Restaurant image URL.
    */
+  static cardImgUrlForRestaurant(restaurant) {
+    const img = restaurant.photograph ? restaurant.photograph : 'placeholder';
+    return (`/img/card_${img}.jpg`);
+  }
+  
   static imageUrlForRestaurant(restaurant) {
     const img = restaurant.photograph ? restaurant.photograph : 'placeholder';
     return (`/img/${img}.jpg`);
