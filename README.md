@@ -2,7 +2,7 @@
 ---
 #### _Three Stage Course Material Project - Restaurant Reviews_
 
-## Project Overview: Stage 1 & 2
+## Project Overview: Stage 1 - 3
 
 For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
 
@@ -16,7 +16,7 @@ After visitng, the webapp will be available offline and remain performant with a
 
 ### How do I run this app?
 
-1. A companion repository is needed to run this successfully.  First, clone the repo here [dsschapira - stage 2 companion repo](https://github.com/dsschapira/mws-restaurant-stage-2) and start it using the command `node server` from the project directory.
+1. A companion repository is needed to run this successfully.  First, clone the repo here [dsschapira - stage 3 companion repo](https://github.com/dsschapira/mws-restaurant-stage-3) and start it using the command `node server` from the project directory.
 
 2. Next, in this  project's folder, start up a simple HTTP server to serve up the site files on your local computer. Python has some simple tools to do this, and you don't even need to know Python. For most people, it's already installed on your computer. 
 
