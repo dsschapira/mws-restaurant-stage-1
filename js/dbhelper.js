@@ -37,7 +37,7 @@ class DBHelper {
 
   static get REVIEW_DB_URL() {
     const port = 1337;
-    return `http://localhost:${port}/reviews/?restaurant_id=`;
+    return `http://localhost:${port}/reviews`;
   }
   /**
    * Fetch all restaurants.
@@ -52,7 +52,7 @@ class DBHelper {
 
   static fetchFromOnline(type, db, callback, restaurantID) {
     const storeReference = (type == "restaurants" ? indexDB.stores.restaurants : (type == "reviews" ? indexDB.stores.reviews : false));
-    const DB_Url = (type == "restaurants" ? DBHelper.RESTAURANT_DB_URL : (type == "reviews" ? DBHelper.REVIEW_DB_URL+restaurantID : false));
+    const DB_Url = (type == "restaurants" ? DBHelper.RESTAURANT_DB_URL : (type == "reviews" ? DBHelper.REVIEW_DB_URL+"/?restaurant_id="+restaurantID : false));
 
     if(!storeReference || !DB_Url){
       console.error("Invalid store type value: ", type);
@@ -346,6 +346,12 @@ class DBHelper {
       });
     });
     //Also upload reviews
+    DBHelper.fetchReviews((err, reviews) => {
+      reviews.forEach(review => {
+        const url = `${DBHelper.REVIEW_DB_URL}/${review.id}`;
+        fetch(url, {method: 'PUT', body: JSON.stringify(review_data)})
+      });
+    });
   }
 
 }

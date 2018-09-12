@@ -319,6 +319,9 @@ nav h1 a {
   color: #000;
   font-size: 1em;
 }
+#reviews-list p{
+  white-space: pre-wrap;
+}
 #add-review-container form{
   max-width: 85%;
   padding-bottom: 50px;

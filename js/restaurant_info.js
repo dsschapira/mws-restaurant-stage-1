@@ -203,13 +203,14 @@ addSubmitListener = () => {
     const date = new Date();
     const now = date.getTime();
     const input = {
-      "name": form.elements["name"].value,
-      "comments": form.elements["comments"].value,
+      "name": scrubUserInput(form.elements["name"].value),
+      "comments": scrubUserInput(form.elements["comments"].value),
       "rating": form.elements["rating"].value,
       "restaurant_id": self.restaurant.id,
       "createdAt": now,
       "updatedAt": now
     };
+    console.log(input.comments);
     DBHelper.postNewReview(input, (status)=>{
       if(status == 200){
         form.reset();
@@ -219,6 +220,23 @@ addSubmitListener = () => {
         console.error("There was an issue posting your review... ", status);
       }
     });
+  });
+}
+
+scrubUserInput = (str) => {
+  const entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+  
+  return str.replace(/[&<>"'`=\/]/g, s => {
+    return entityMap[s];
   });
 }
 
