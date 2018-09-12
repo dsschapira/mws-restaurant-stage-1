@@ -21,7 +21,7 @@ function openIndexDatabase(){
 
   return idb.open(indexDB.name, indexDB.version, upgradeDB => {
     upgradeDB.createObjectStore(indexDB.stores.restaurants, { keyPath: 'id'});
-    upgradeDB.createObjectStore(indexDB.stores.reviews, {keyPath: 'id'});
+    upgradeDB.createObjectStore(indexDB.stores.reviews, {keyPath: 'id', autoIncrement: true});
   });
 }
 
@@ -114,7 +114,7 @@ class DBHelper {
   }
 
   /**
-   * Fetch a restaurant by its ID.
+   * Fetch a restaurant and reviews by its ID.
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
@@ -128,6 +128,18 @@ class DBHelper {
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
         }
+      }
+    });
+  }
+
+  static fetchReviewsById(id, callback) {
+    DBHelper.fetchReviews((error, reviews) => {
+      if(error){
+        callback(error, null);
+      }
+      else {
+        const review_set = reviews.filter( review => review.restaurant_id === id );
+        callback(null, review_set);
       }
     });
   }
@@ -274,6 +286,8 @@ class DBHelper {
         });
       });
 
+      return tx.complete;
+
     }).catch(err => {
       console.warn("There was an error opening IndexDB.");
       console.warn(err);
@@ -283,6 +297,37 @@ class DBHelper {
       .catch(err => {
         console.warn('There was an error updating the DB... will attempt again on reconnect. ', err);
       });
+  }
+
+  static postNewReview(review_data, cb){
+    const url = `${DBHelper.REVIEW_DB_URL}/`;
+
+    const dbPromise = openIndexDatabase();
+
+    dbPromise.then( db => {
+      const tx = db.transaction(indexDB.stores.reviews, 'readwrite');
+      const store = tx.objectStore(indexDB.stores.reviews);
+
+      store.add(review_data)
+      .then(()=>{
+        cb(200);
+      })
+      .catch((err)=>{
+        cb(err);
+      });
+
+      return tx.complete;
+
+    }).catch(err => {
+      console.warn("There was an error opening IndexDB.");
+      console.warn(err);
+    });
+
+    fetch(url, { method: 'POST', body: JSON.stringify(review_data) } )
+      .catch(err => {
+        console.warn('There was an error updating the DB... will attempt again on reconnect. ', err);
+      });
+
   }
 
   static updateServerState(){
